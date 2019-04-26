@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,18 +16,18 @@ public class CaseDBHelper extends SQLiteOpenHelper {
 
     private Context myContext;
     private String DB_PATH = "/data/data/bcgcompetitionapp.siyuxiang.com.bcgcompetitionapp/databases/";
-    private static String DB_NAME = "casedata.db";
-    private static String ASSETS_NAME = "casedata.db";
+    private static String DB_NAME = "caseupdatedata_2.db";
+    private static String ASSETS_NAME = "caseupdatedata_2.db";
     private SQLiteDatabase myDatabase = null;
 
     public CaseDBHelper (Context context) {
-        super(context, "casedata.db", null, 1);
+        super(context, "caseupdatedata_2.db", null, 1);
         this.myContext = context;
     }
 
     public void createDataBase() throws IOException {
         boolean dbExist = checkDataBase();
-
+        Log.e("createDataBase","dbExist= "+dbExist);
         if (!dbExist) {
             try {
                 File dir = new File(DB_PATH);
@@ -37,7 +38,8 @@ public class CaseDBHelper extends SQLiteOpenHelper {
                 if (dbf.exists()) {
                     dbf.delete();
                 }
-                SQLiteDatabase.openOrCreateDatabase(dbf, null);
+                SQLiteDatabase d= SQLiteDatabase.openOrCreateDatabase(dbf, null);
+                Log.e("CaseDBHelper","d= "+d);
                 copyDataBase();
             } catch (IOException e) {
                 throw new Error("数据库创建失败");
@@ -72,7 +74,7 @@ public class CaseDBHelper extends SQLiteOpenHelper {
             checkDB = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
         }
         catch (SQLiteException e) {
-
+            Log.e("CaseDBHelper","e= "+e.toString());
         }
         if (checkDB != null) {
             checkDB.close();

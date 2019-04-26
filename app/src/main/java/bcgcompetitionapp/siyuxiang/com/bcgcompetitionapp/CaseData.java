@@ -13,6 +13,15 @@ public class CaseData {
     private int cost;
     private int netIncome;
 
+    public CaseData() {
+        activeMembershipNumber = 0;
+        visitorsToStore = 0;
+        totalOrder = 0;
+        orderRevenue = 0;
+        cost = 0;
+        netIncome = 0;
+    }
+
     public String getAddress() {
         return address;
     }

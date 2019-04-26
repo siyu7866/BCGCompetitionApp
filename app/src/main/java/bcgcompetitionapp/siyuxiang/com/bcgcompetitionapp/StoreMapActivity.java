@@ -1,6 +1,7 @@
 package bcgcompetitionapp.siyuxiang.com.bcgcompetitionapp;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -86,19 +88,121 @@ public class StoreMapActivity extends AppCompatActivity implements OnMapReadyCal
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(StoreMapActivity.this);
                 String item = (String) mapFilterSpinner.getSelectedItem();
-                if (item == "Price") {
-                    final String[] rangePrice = {"30000~50000", "50000~70000"};
-                    builder.setTitle("Price");
-                    builder.setMultiChoiceItems(rangePrice, null, new DialogInterface.OnMultiChoiceClickListener() {
+                if (item == "Net Income") {
+                    final String[] rangePrice = {"2.0M~2.2M", "1.8M~2.0M", "1.6M~1.8M", "1.4~1.6M"};
+                    final boolean[] checkedRange = {false, false, false, false};
+                    builder.setTitle("Net Income");
+                    builder.setMultiChoiceItems(rangePrice, checkedRange, new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                            Toast.makeText(StoreMapActivity.this, "Success", Toast.LENGTH_LONG).show();
+                            if(isChecked) {
+                                switch (which) {
+                                    case 0: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxnetincome", 2200000).putInt("minnetincome", 2000000).apply();
+                                        break;
+                                    case 1: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxnetincome", 2000000).putInt("minnetincome", 1800000).apply();
+                                        break;
+                                    case 2: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxnetincome", 1800000).putInt("minnetincome", 1600000).apply();
+                                        break;
+                                    case 3: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxnetincome", 1600000).putInt("minnetincome", 1400000).apply();
+                                        break;
+                                }
+                            }
                         }
                     });
                     builder.setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
+                            int maxNetIncome = getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                    getInt("maxnetincome", 2200000);
+                            int minNetIncome = getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                    getInt("minnetincome", 2000000);
+                            try {
+                                CaseDataSource ds = new CaseDataSource(StoreMapActivity.this);
+                                ds.open();
+                                storeAddresses = ds.getStoreAddressesOnNetIncome(maxNetIncome, minNetIncome);
+                                ds.close();
+                            }
+                            catch (Exception e) {
+                                Toast.makeText(StoreMapActivity.this, "Address(es) couldn't be retrieved", Toast.LENGTH_LONG).show();
+                            }
+                            gMap.clear();
+                            for (int i = 0; i < storeAddresses.size(); i++) {
+                                createMarker(storeAddresses.get(i).getAddress(), storeAddresses.get(i).getCity(), storeAddresses.get(i).getState(),
+                                        storeAddresses.get(i).getZipCode(), storeAddresses.get(i).getNetIncome());
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                CaseDataSource ds = new CaseDataSource(StoreMapActivity.this);
+                                ds.open();
+                                storeAddresses = ds.getStoreAddresses();
+                                ds.close();
+                            }
+                            catch (Exception e) {
+                                Toast.makeText(StoreMapActivity.this, "Address(es) couldn't be retrieved", Toast.LENGTH_LONG).show();
+                            }
+                            for (int i = 0; i < storeAddresses.size(); i++) {
+                                createMarker(storeAddresses.get(i).getAddress(), storeAddresses.get(i).getCity(), storeAddresses.get(i).getState(),
+                                        storeAddresses.get(i).getZipCode(), storeAddresses.get(i).getNetIncome());
+                            }
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                }
+                else if (item == "Revenue") {
+                    final String[] rangeRevenue = {"2.0M~2.2M", "1.8M~2.0M", "1.6M~1.8M", "1.4~1.6M"};
+                    final boolean[] checkedRange = {false, false, false, false};
+                    builder.setTitle("Revenue");
+                    builder.setMultiChoiceItems(rangeRevenue, checkedRange, new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            if(isChecked) {
+                                switch (which) {
+                                    case 0: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxrevenue", 2200000).putInt("minrevenue", 2000000).apply();
+                                        break;
+                                    case 1: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxrevenue", 2000000).putInt("minrevenue", 1800000).apply();
+                                        break;
+                                    case 2: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxrevenue", 1800000).putInt("minrevenue", 1600000).apply();
+                                        break;
+                                    case 3: getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                            edit().putInt("maxrevenue", 1600000).putInt("minrevenue", 1400000).apply();
+                                        break;
+                                }
+                            }
+                        }
+                    });
+                    builder.setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            int maxRevenue = getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                    getInt("maxrevenue", 2200000);
+                            int minRevenue= getSharedPreferences("BCGCompetitionPreferences", Context.MODE_PRIVATE).
+                                    getInt("minrevenue", 2000000);
+                            try {
+                                CaseDataSource ds = new CaseDataSource(StoreMapActivity.this);
+                                ds.open();
+                                storeAddresses = ds.getStoreAddressesOnAverageRevenue(maxRevenue, minRevenue);
+                                ds.close();
+                            }
+                            catch (Exception e) {
+                                Toast.makeText(StoreMapActivity.this, "Address(es) couldn't be retrieved", Toast.LENGTH_LONG).show();
+                            }
+                            gMap.clear();
+                            for (int i = 0; i < storeAddresses.size(); i++) {
+                                createMarker(storeAddresses.get(i).getAddress(), storeAddresses.get(i).getCity(), storeAddresses.get(i).getState(),
+                                        storeAddresses.get(i).getZipCode(), storeAddresses.get(i).getOrderRevenue());
+                            }
                         }
                     });
                     builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -109,7 +213,7 @@ public class StoreMapActivity extends AppCompatActivity implements OnMapReadyCal
                     });
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
-                }
+                 }
             }
 
             @Override
@@ -128,18 +232,10 @@ public class StoreMapActivity extends AppCompatActivity implements OnMapReadyCal
             createMarker(storeAddresses.get(i).getAddress(), storeAddresses.get(i).getCity(), storeAddresses.get(i).getState(),
                     storeAddresses.get(i).getZipCode(), storeAddresses.get(i).getNetIncome());
         }
-
         // Add a marker in Sydney and move the camera
         /*LatLng sydney = new LatLng(-34, 151);
         gMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         gMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
-    }
-
-    private List<String> getSpinnerData() {
-        List<String> dataList = new ArrayList<String>();
-        dataList.add("Price");
-        dataList.add("Revenue");
-        return dataList;
     }
 
     private void initButtonStoreChart() {
@@ -248,5 +344,12 @@ public class StoreMapActivity extends AppCompatActivity implements OnMapReadyCal
 
         return  gMap.addMarker(new MarkerOptions().position(point).
                 title(String.valueOf(netIncome)).snippet(address));
+    }
+
+    private List<String> getSpinnerData() {
+        List<String> dataList = new ArrayList<String>();
+        dataList.add("Net Income");
+        dataList.add("Revenue");
+        return dataList;
     }
 }
