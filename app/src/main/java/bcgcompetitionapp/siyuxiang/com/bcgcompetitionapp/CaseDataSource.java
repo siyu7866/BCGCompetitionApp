@@ -144,4 +144,31 @@ public class CaseDataSource {
         }
         return storeAddresses;
     }
+
+    public ArrayList<CaseData> getSpecificStoreNetIncome(String storeAddress) {
+        String indexStoreAddress = storeAddress.substring(0, 4);
+        ArrayList<CaseData> storeNetIncome = new ArrayList<CaseData>();
+        Cursor cursor = null;
+
+        try {
+            String query = "SELECT address, month, [net income] FROM competition_fakedata_042519_1 WHERE address LIKE '%" + indexStoreAddress + "%' ";
+            cursor = database.rawQuery(query, null);
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                CaseData caseData = new CaseData();
+                //caseData.setOrderRevenue(cursor.getInt(4));
+                caseData.setAddress(cursor.getString(0));
+                caseData.setMonth(cursor.getString(1));
+                //String string = String.valueOf(caseData.getOrderRevenue());
+                caseData.setNetIncome(cursor.getInt(2));
+                storeNetIncome.add(caseData);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        catch (Exception e) {
+            cursor.close();
+        }
+        return storeNetIncome;
+    }
 }

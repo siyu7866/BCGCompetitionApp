@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         initButtonStoreLocation();
+        initItemClick();
     }
 
     @Override
@@ -236,6 +237,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, StoreMapActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void initItemClick() {
+        ListView listView = (ListView) findViewById(R.id.listStore);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+                CaseData selectedCase = caseData.get(position);
+                Intent intent = new Intent (MainActivity.this, StoreChartActivity.class);
+                intent.putExtra("storeAddress", selectedCase.getAddress());
                 startActivity(intent);
             }
         });
